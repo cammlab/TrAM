@@ -37,7 +37,7 @@ This function provides measures of discontinuities present across multiple simul
 time series to enable detection of erroneous data that are "jumpy".
 }
 \examples{
-\\preformatted{
+
 num.objects <- 100
 num.timepoints <- 25
 jumpy.fraction <- 0.1
@@ -77,13 +77,13 @@ trams <- do.call(rbind, by(scaled.data, scaled.data$object.number, function(scal
     data.frame(object.number=scaled.object.data$object.number[1], tram=tram(values)['tram'])
 }))
 
-trams <- merge(trams, subset(data, time == 1, select=c(object.number, is.jumpy))) # merge in is.jumpy annotation
-}
+trams <- merge(trams, subset(data, time == 1, # merge in is.jumpy annotation
+ select=c(object.number, is.jumpy)))
+
 
 \dontrun{
 with(trams, plot(tram, is.jumpy)) # dot plot
 }
-
 
 }
 

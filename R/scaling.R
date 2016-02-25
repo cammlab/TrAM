@@ -10,12 +10,13 @@
 #'   index <- rep(1:num.vecs, vec.lengths)
 #'   values <- rep(100*rnorm(num.vecs), vec.lengths) + rnorm(sum(vec.lengths))
 #'   median_abs_diff(values, index)
-#' 
+#'
+#' @export
 median_abs_diff <- function(values, index) {
     stopifnot(all(!is.na(values))) # may not have any NA
     stopifnot(is.numeric(values)) # must be numeric
     stopifnot(length(values) > 1) # must have more than one value
-    
+
     data_list <- split(values, index) # split up the data by index, keeping the order within each vector
 
     ## for each individual vector, compute the absolute value of each time difference
@@ -48,14 +49,15 @@ median_abs_diff <- function(values, index) {
 #'                     ts1=rnorm(num.data.points),
 #'                     ts2=10*rnorm(num.data.points))
 #'   rescaled.data <-  median_abs_diff_rescale(data, "group", "time", c("ts1", "ts2"))
-#' 
+#'
+#' @export
 median_abs_diff_rescale <- function(data, group.col.name, time.col.name, data.col.names) {
     ## arrange the data by group and then by time so the data are ordered
     data <- data[order(data[,group.col.name], data[,time.col.name]),]
 
     index <- data[,group.col.name] # data vector ids
     time <- data[,time.col.name]
-    
+
     rescaled.values <- lapply(data.col.names, function(name) {
         values <- data[,name]
         scaling.factor <- median_abs_diff(values, index)

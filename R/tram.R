@@ -21,54 +21,55 @@
 #' @return Vector containing overall TrAM (named "tram") and component TrAM
 #'   values prior to summing.
 #' @examples
-#' \preformatted{
+#'
 #' num.objects <- 100
 #' num.timepoints <- 25
 #' jumpy.fraction <- 0.1
 #' jump.scale <- 1
 #' noise.level <- 0.2
-#' 
+#'
 #' data <- do.call(rbind, lapply(1:num.objects, function(object.number) {
 #'     generate_smooth_series <- function() {
 #'         times.scaled <- 2*(1:num.timepoints)/num.timepoints - 1
 #'         rnorm(1) + rnorm(1)*times.scaled + 3*rnorm(1)*times.scaled^2 # quadratic
 #'     }
-#' 
+#'
 #'     relative.brightness.scale <- 100
-#' 
+#'
 #'     x <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
 #'     y <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
 #'     brightness <- relative.brightness.scale * (10 + generate_smooth_series() +
 #'                                                    noise.level*rnorm(num.timepoints))
-#' 
+#'
 #'     ## see if this one will be jumpy
 #'     is.jumpy <- runif(1) < jumpy.fraction
 #'     if(is.jumpy) {
 #'         jump.timepoint <- 2 + round((num.timepoints-5)*runif(1))
-#' 
+#'
 #'         x[jump.timepoint] <-  x[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
 #'         y[jump.timepoint] <-  y[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
 #'         brightness[jump.timepoint] <-  brightness[jump.timepoint] +
 #'             relative.brightness.scale*sample(c(-1,1),1)*jump.scale*(1+0.3*rnorm(1))
 #'     }
-#' 
+#'
 #'     data.frame(object.number, time=1:num.timepoints, x, y, brightness, is.jumpy)
 #' }))
-#' 
+#'
 #' scaled.data <- median_abs_diff_rescale(data, "object.number", "time", c("x", "y", "brightness"))
 #' trams <- do.call(rbind, by(scaled.data, scaled.data$object.number, function(scaled.object.data) {
 #'     values <- with(scaled.object.data, cbind(x, y, brightness))
 #'     data.frame(object.number=scaled.object.data$object.number[1], tram=tram(values)['tram'])
 #' }))
-#' 
-#' trams <- merge(trams, subset(data, time == 1, select=c(object.number, is.jumpy))) # merge in is.jumpy annotation
-#' }
-#' 
+#'
+#' trams <- merge(trams, subset(data, time == 1, # merge in is.jumpy annotation
+#'  select=c(object.number, is.jumpy)))
+#'
+#'
 #' \dontrun{
 #' with(trams, plot(tram, is.jumpy)) # dot plot
 #' }
-#' 
-#' 
+#'
+#' @export
 tram <- function(values,
                  num.knots = floor(nrow(values)/5),
                  gamma = 0.5,
@@ -79,7 +80,7 @@ tram <- function(values,
     stopifnot(is.numeric(values))
     stopifnot(num.knots > 0)
     stopifnot(gamma > 0)
-              
+
 
     ## if there are any NA then we can't do the calculation
     if(any(is.na(values))) return(NA)
