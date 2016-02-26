@@ -10,7 +10,7 @@
 #'   types of measurement will typically be rescaled so their typical fluctuations
 #'   are comparable in scale (see \code{\link{median_abs_diff_rescale}}).
 #' @param num.knots A positive integer number of knots in the smoothing spline fits.
-#' @param gamma Positive exponent used to combine jumpiness across the time series.
+#' @param p Positive exponent used to combine jumpiness across the time series.
 #'   Values >1 tend to emphasize the single time series with the most jumpiness,
 #'   whereas values <1 emphasize simultaneous jumps between multiple time series.
 #' @param euclidian.list A named list whose elements are character vectors. Each
@@ -72,14 +72,14 @@
 #' @export
 tram <- function(values,
                  num.knots = floor(nrow(values)/5),
-                 gamma = 0.5,
+                 p = 0.5,
                  euclidian.list = list()) {
 
     if(nrow(values) < 6) stop("Must be at least 6 points in time series.")
     stopifnot(!is.null(colnames(values)))
     stopifnot(is.numeric(values))
     stopifnot(num.knots > 0)
-    stopifnot(gamma > 0)
+    stopifnot(p > 0)
 
 
     ## if there are any NA then we can't do the calculation
@@ -131,7 +131,7 @@ tram <- function(values,
         abs.deltas <- do.call(cbind, cols.list)
     }
 
-    v <- (rowSums(weights[colnames(abs.deltas)] * abs.deltas^gamma)) ^ (1/gamma)
+    v <- (rowSums(weights[colnames(abs.deltas)] * abs.deltas^p)) ^ (1/p)
     multi.tram <- max(v) # dist exponent < 1 means conincidences across dimensions weigh more heavily
 
     individual.trams <- apply(abs.deltas, 2, max) # individual tram is max for that column (across time)
