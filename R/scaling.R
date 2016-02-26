@@ -65,7 +65,7 @@ median_abs_diff_rescale <- function(data, group.col.name, time.col.name, data.co
         values/scaling.factor # rescale
     })
 
-    result.frame <-  as.data.frame(cbind(index, time, do.call(cbind, rescaled.values)))
+    result.frame <-  as.data.frame(cbind(data.frame(index), data.frame(time), data.frame(do.call(cbind, rescaled.values))))
     names(result.frame) <-  c(group.col.name, time.col.name, data.col.names)
 
     result.frame
