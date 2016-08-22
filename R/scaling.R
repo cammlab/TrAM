@@ -41,14 +41,14 @@ median_abs_diff <- function(values, index) {
 #' @return A data frame containing the same column names specified in the function
 #'   call, but with the data column values rescaled
 #' @examples
-#'   num.time.series = 10
-#'   time.series.length = 25
+#'   num.time.series <- 10
+#'   time.series.length <- 25
 #'   num.data.points <-  num.time.series * time.series.length
-#'   data = data.frame(group=rep(1:num.time.series, time.series.length),
-#'                     time=rep(1:time.series.length, num.time.series),
-#'                     ts1=rnorm(num.data.points),
-#'                     ts2=10*rnorm(num.data.points))
-#'   rescaled.data <-  median_abs_diff_rescale(data, "group", "time", c("ts1", "ts2"))
+#'   data <- data.frame(group=rep(1:num.time.series, time.series.length),
+#'                      time=rep(1:time.series.length, num.time.series),
+#'                      ts1=rnorm(num.data.points),
+#'                      ts2=10*rnorm(num.data.points))
+#'   rescaled.data <- median_abs_diff_rescale(data, "group", "time", c("ts1", "ts2"))
 #'
 #' @export
 median_abs_diff_rescale <- function(data, group.col.name, time.col.name, data.col.names) {

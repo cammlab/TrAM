@@ -1,10 +1,14 @@
 Package: tram
-Title: Metrics for Finding Jumpiness in Multiple Simultaneous Time Series
+Title: Metrics for Discovering Simultaneous Jumps in Multiple Time Series
 Version: 0.0.0.9000
 Authors@R: person("Dan", "Ruderman", email = "ruderman@usc.edu", role = c("aut", "cre"))
-Description: What the package does (one paragraph)
+Description: Provides a metric for simultaneous non-smoothness in multiple time
+    series. The metric can be used to detect aberrant behavior for correction or
+    removal.
 Depends:
     R (>= 3.2.1)
-License: What license is it under?
+Imports:
+    stats
+License: GPL-2
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000

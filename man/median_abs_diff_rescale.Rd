@@ -29,14 +29,14 @@ Return a data frame which contains time series from an input data frame rescaled
 by each time series's median absolute temporal fluctuations
 }
 \examples{
-  num.time.series = 10
-  time.series.length = 25
+  num.time.series <- 10
+  time.series.length <- 25
   num.data.points <-  num.time.series * time.series.length
-  data = data.frame(group=rep(1:num.time.series, time.series.length),
-                    time=rep(1:time.series.length, num.time.series),
-                    ts1=rnorm(num.data.points),
-                    ts2=10*rnorm(num.data.points))
-  rescaled.data <-  median_abs_diff_rescale(data, "group", "time", c("ts1", "ts2"))
+  data <- data.frame(group=rep(1:num.time.series, time.series.length),
+                     time=rep(1:time.series.length, num.time.series),
+                     ts1=rnorm(num.data.points),
+                     ts2=10*rnorm(num.data.points))
+  rescaled.data <- median_abs_diff_rescale(data, "group", "time", c("ts1", "ts2"))
 
 }
 
