@@ -4,7 +4,7 @@
 \alias{tram}
 \title{Compute the Tracking Aberration Measure (TrAM)}
 \usage{
-tram(values, num.knots = floor(nrow(values)/5), gamma = 0.5,
+tram(values, num.knots = floor(nrow(values)/5), p = 0.5,
   euclidian.list = list())
 }
 \arguments{
@@ -15,7 +15,7 @@ are comparable in scale (see \code{\link{median_abs_diff_rescale}}).}
 
 \item{num.knots}{A positive integer number of knots in the smoothing spline fits.}
 
-\item{gamma}{Positive exponent used to combine jumpiness across the time series.
+\item{p}{Positive exponent used to combine jumpiness across the time series.
 Values >1 tend to emphasize the single time series with the most jumpiness,
 whereas values <1 emphasize simultaneous jumps between multiple time series.}
 
@@ -37,52 +37,17 @@ This function provides measures of discontinuities present across multiple simul
 time series to enable detection of erroneous data that are "jumpy".
 }
 \examples{
+scaled.cell.data <- median_abs_diff_rescale(cell.data, "cell",  "timepoint",
+                                            c("x","y", "nuclear.roundness"))
 
-num.objects <- 100
-num.timepoints <- 25
-jumpy.fraction <- 0.1
-jump.scale <- 1
-noise.level <- 0.2
-
-data <- do.call(rbind, lapply(1:num.objects, function(object.number) {
-    generate_smooth_series <- function() {
-        times.scaled <- 2*(1:num.timepoints)/num.timepoints - 1
-        rnorm(1) + rnorm(1)*times.scaled + 3*rnorm(1)*times.scaled^2 # quadratic
-    }
-
-    relative.brightness.scale <- 100
-
-    x <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
-    y <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
-    brightness <- relative.brightness.scale * (10 + generate_smooth_series() +
-                                                   noise.level*rnorm(num.timepoints))
-
-    ## see if this one will be jumpy
-    is.jumpy <- runif(1) < jumpy.fraction
-    if(is.jumpy) {
-        jump.timepoint <- 2 + round((num.timepoints-5)*runif(1))
-
-        x[jump.timepoint] <-  x[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
-        y[jump.timepoint] <-  y[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
-        brightness[jump.timepoint] <-  brightness[jump.timepoint] +
-            relative.brightness.scale*sample(c(-1,1),1)*jump.scale*(1+0.3*rnorm(1))
-    }
-
-    data.frame(object.number, time=1:num.timepoints, x, y, brightness, is.jumpy)
+trams <- do.call(rbind,by(scaled.cell.data, scaled.cell.data$cell,
+                 function(scaled.cell.data) {
+  values <- with(scaled.cell.data, cbind(x, y, nuclear.roundness))
+  data.frame(cell=scaled.cell.data$cell[1],
+             tram=tram(values, euclidian.list=list(xy=c("x", "y")))["tram"])
 }))
-
-scaled.data <- median_abs_diff_rescale(data, "object.number", "time", c("x", "y", "brightness"))
-trams <- do.call(rbind, by(scaled.data, scaled.data$object.number, function(scaled.object.data) {
-    values <- with(scaled.object.data, cbind(x, y, brightness))
-    data.frame(object.number=scaled.object.data$object.number[1], tram=tram(values)['tram'])
-}))
-
-trams <- merge(trams, subset(data, time == 1, # merge in is.jumpy annotation
- select=c(object.number, is.jumpy)))
-
 
 \dontrun{
-with(trams, plot(tram, is.jumpy)) # dot plot
 }
 
 }

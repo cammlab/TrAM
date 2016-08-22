@@ -20,53 +20,20 @@
 #'   where spherical symmetry in the error is important to maintain.
 #' @return Vector containing overall TrAM (named "tram") and component TrAM
 #'   values prior to summing.
+#'
 #' @examples
+#' scaled.cell.data <- median_abs_diff_rescale(cell.data, "cell",  "timepoint",
+#'                                             c("x","y", "nuclear.roundness"))
 #'
-#' num.objects <- 100
-#' num.timepoints <- 25
-#' jumpy.fraction <- 0.1
-#' jump.scale <- 1
-#' noise.level <- 0.2
-#'
-#' data <- do.call(rbind, lapply(1:num.objects, function(object.number) {
-#'     generate_smooth_series <- function() {
-#'         times.scaled <- 2*(1:num.timepoints)/num.timepoints - 1
-#'         rnorm(1) + rnorm(1)*times.scaled + 3*rnorm(1)*times.scaled^2 # quadratic
-#'     }
-#'
-#'     relative.brightness.scale <- 100
-#'
-#'     x <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
-#'     y <- generate_smooth_series() + noise.level*rnorm(num.timepoints)
-#'     brightness <- relative.brightness.scale * (10 + generate_smooth_series() +
-#'                                                    noise.level*rnorm(num.timepoints))
-#'
-#'     ## see if this one will be jumpy
-#'     is.jumpy <- runif(1) < jumpy.fraction
-#'     if(is.jumpy) {
-#'         jump.timepoint <- 2 + round((num.timepoints-5)*runif(1))
-#'
-#'         x[jump.timepoint] <-  x[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
-#'         y[jump.timepoint] <-  y[jump.timepoint] + sample(c(-1,1),1) * jump.scale*(1+0.3*rnorm(1))
-#'         brightness[jump.timepoint] <-  brightness[jump.timepoint] +
-#'             relative.brightness.scale*sample(c(-1,1),1)*jump.scale*(1+0.3*rnorm(1))
-#'     }
-#'
-#'     data.frame(object.number, time=1:num.timepoints, x, y, brightness, is.jumpy)
+#' trams <- do.call(rbind,by(scaled.cell.data, scaled.cell.data$cell,
+#'                  function(scaled.cell.data) {
+#'   values <- with(scaled.cell.data, cbind(x, y, nuclear.roundness))
+#'   data.frame(cell=scaled.cell.data$cell[1],
+#'              tram=tram(values, euclidian.list=list(xy=c("x", "y")))["tram"])
 #' }))
-#'
-#' scaled.data <- median_abs_diff_rescale(data, "object.number", "time", c("x", "y", "brightness"))
-#' trams <- do.call(rbind, by(scaled.data, scaled.data$object.number, function(scaled.object.data) {
-#'     values <- with(scaled.object.data, cbind(x, y, brightness))
-#'     data.frame(object.number=scaled.object.data$object.number[1], tram=tram(values)['tram'])
-#' }))
-#'
-#' trams <- merge(trams, subset(data, time == 1, # merge in is.jumpy annotation
-#'  select=c(object.number, is.jumpy)))
-#'
 #'
 #' \dontrun{
-#' with(trams, plot(tram, is.jumpy)) # dot plot
+#  with(subset(cell.data, cell == "C12"), {plot(timepoint, nuclear.roundness); lines(timepoint, nuclear.roundness)})
 #' }
 #'
 #' @export
@@ -75,7 +42,7 @@ tram <- function(values,
                  p = 0.5,
                  euclidian.list = list()) {
 
-    if(nrow(values) < 6) stop("Must be at least 6 points in time series.")
+    if (nrow(values) < 6) stop("Must be at least 6 points in time series.")
     stopifnot(!is.null(colnames(values)))
     stopifnot(is.numeric(values))
     stopifnot(num.knots > 0)
@@ -83,7 +50,7 @@ tram <- function(values,
 
 
     ## if there are any NA then we can't do the calculation
-    if(any(is.na(values))) return(NA)
+    if (any(is.na(values))) return(NA)
 
     time.points <- 1:nrow(values) # define uniformly spaced time points for the values
 
@@ -95,7 +62,7 @@ tram <- function(values,
 
 
     ## If there are no Euclidian metrics then that makes things easy
-    if(length(euclidian.list) == 0) {
+    if (length(euclidian.list) == 0) {
         weights <- rep (1/num.time.series, num.time.series) # all variables have the same weight
         names(weights) <- colnames(values)
     } else {
@@ -119,7 +86,7 @@ tram <- function(values,
 
         remaining.col.names <- setdiff(colnames(abs.deltas), used.names) # names not used for euclidian metrics
 
-        if(length(remaining.col.names) > 0) { # if there are any left over take account of them
+        if (length(remaining.col.names) > 0) { # if there are any left over take account of them
             remaining.abs.deltas <- abs.deltas[, remaining.col.names, drop=F] # need to keep as matrix so use drop=F
             cols.list[[length(cols.list)+1]] <- remaining.abs.deltas # store it at the end
             weights[colnames(remaining.abs.deltas)] <- 1 # all remaining columns have weight=1
